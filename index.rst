@@ -30,14 +30,14 @@
 
    **This technote is not yet published.**
 
-   This technote describes the design of the metric and specification system that the new validation framework will use.
+   This technote describes the design of the Metric and Specification system that the new validation framework will use.
 
 Frossie's design principles
 ===========================
 
 * Metric something something of code. (FIXME)
 * Implement as a thin shim over what will become a Butler put.
-* UX for metric developers: make it as easy as possible for a developer to define a new metric and measurements appear in SQUASH and be monitored.
+* UX for Metric developers: make it as easy as possible for a developer to define a new ``Metric`` and ``Measurements`` appear in SQUASH and be monitored.
 
 The validate_base 2.0 data model
 ================================
@@ -45,20 +45,36 @@ The validate_base 2.0 data model
 Afterburner
 -----------
 
-An ``afterburner`` is a piece of code that is executed on the output of a ``Task`` in order to calculate a ``measurement`` of a ``metric``.
+An ``afterburner`` is a piece of code that is executed on the output of a ``Task`` in order to calculate a ``Measurement`` of a ``Metric``.
+
+MetricSet
+---------
+
+A ``MetricSet`` is a collection of ``Metrics`` and their associated metadata.
+
+Attributes
+^^^^^^^^^^
+
+* name - ``jointcal_cfht_r``
+* eups package name of data
+* directory within eups data package for dataset
+* butler dataId or list of dataIds (optional)
+* Metrics (list?)
 
 Metric
 ------
 
-A ``metric`` is a quantity that is measureable.
+A ``Metric`` is a quantity that is measureable.
 
 Prior art
 ^^^^^^^^^
 
 * ``lsst.validate.base.Metric``
-* ``metric.yaml format``
+* ``Metric.yaml format``
 
-* ``Attributes``
+Attributes
+^^^^^^^^^^
+
 * ``name``
 * ``description``
 * ``unit``
@@ -69,14 +85,14 @@ Prior art
 Questions & Notes
 ^^^^^^^^^^^^^^^^^
 
-* ``Specifications`` are no longer contained by ``metrics``.
-* In the existing ``lsst.validate.base.Metric``, there is a parameters dictionary that defines constants for the measurement code. For example, the annulus diameter from AMx metrics. These parameters will be contained in the ``specifications``.
-* We talked about making the minimum provenance required for a measurement/job being defined in the Metric. Is this still a thing?
+* ``Specifications`` are no longer contained by ``Metrics``.
+* In the existing ``lsst.validate.base.Metric``, there is a parameters dictionary that defines constants for the Measurement code. For example, the annulus diameter from AMx Metrics. These parameters will be contained in the ``Specifications``.
+* We talked about making the minimum ``Provenance`` required for a ``Measurement``/``Job`` being defined in the ``Metric``. Is this still a requirement?
 
 Measurement
 -----------
 
-A ``measurement`` is a realization of a ``metric``: always a scalar value.
+A ``Measurement`` is a realization of a ``Metric``: always a scalar value.
 
 Prior art
 ^^^^^^^^^
@@ -86,20 +102,20 @@ Prior art
 Attributes
 ^^^^^^^^^^
 
-* ``job_id`` — Job identifier.
-* ``metric_name`` — Metric identifier.
-* ``value`` — scalar measurement value, required to be persisted in units of ``metric.unit``.
+* ``Job_id`` — Job identifier.
+* ``Metric_name`` — Metric identifier.
+* ``value`` — scalar Measurement value, required to be persisted in units of ``Metric.unit``.
 
 Questions & Notes
 ^^^^^^^^^^^^^^^^^
 
-* ``lsst.validate.base.MeasurementBase`` originally had a parameters attribute that provided provenance for how the measurement was made (e.g., a S/N cut-off for star selection). These will now be part of the Task configuration, and available through the regular provenance.
-* ``lsst.validate.base.MeasurementBase`` also had an extras attribute where additional measurement outputs could be persisted (JSON serializable). Do we still want this? Or do we always want such data to go into a Blob?
+* ``lsst.validate.base.MeasurementBase`` originally had a parameters attribute that provided Provenance for how the Measurement was made (e.g., a S/N cut-off for star selection). These will now be part of the Task configuration, and available through the regular Provenance.
+* ``lsst.validate.base.MeasurementBase`` also had an extras attribute where additional Measurement outputs could be persisted (JSON serializable). Do we still want this? Or do we always want such data to go into a Blob?
 
 Blob
 ----
 
-A ``blob`` is a container for JSON-serializable data that may be associated with one or more measurements that might be useful for rendering plots and doing SQUASH-side analysis.
+A ``blob`` is a container for JSON-serializable data that may be associated with one or more Measurements that might be useful for rendering plots and doing SQUASH-side analysis.
 
 Prior art
 ^^^^^^^^^
@@ -109,7 +125,7 @@ Prior art
 Job
 ---
 
-A ``job`` is an execution of a pipeline, containing ``measurements``, ``blobs``, and their ``provenance``.
+A ``Job`` is an execution of a pipeline, containing ``Measurements``, ``blobs``, and their ``Provenance``.
 
 Prior art
 ^^^^^^^^^
@@ -119,56 +135,70 @@ Prior art
 Attributes
 ^^^^^^^^^^
 
-* ``measurements`` — list of Measurement objects.
-* ``blobs`` — list of Blob objects. Each blob should be reference by at least one * measurement.
-* ``provenance`` — data structure that fully specifies the provenance of the pipeline run.
+* ``Measurements`` — list of Measurement objects.
+* ``blobs`` — list of Blob objects. Each blob should be reference by at least one * Measurement.
+* ``Provenance`` — data structure that fully specifies the Provenance of the pipeline run.
 
 Questions & Notes
 ^^^^^^^^^^^^^^^^^^^
 
-* What is the schema of ``provenance``? At minimum, it includes the input dataIds (input dataset) and task configurations.
-* Not all ``provenance`` is currently known within the pipeline. We use post-qa to hydrate Job provenance with package versions and Jenkins environment variables. However, working towards a state where post-qa is no longer used as a shim, it's not unreasonable to move this into validate_base.
+* What is the schema of ``Provenance``? At minimum, it includes the input dataIds (input dataset) and task configurations.
+* Not all ``Provenance`` is currently known within the pipeline. We use post-qa to hydrate Job Provenance with package versions and Jenkins environment variables. However, working towards a state where post-qa is no longer used as a shim, it's not unreasonable to move this into validate_base.
+
+Provenance
+----------
+
+All metadata associated with this ``Job`` run, including Config parameters, Butler dataRefs, cluster configuration, etc.
+
+Questions & Notes
+^^^^^^^^^^^^^^^^^
+
+* How is provenance defined?
+* How do we define queries on provenance in a ``Specification``?
+* How do we map between this provenance and the one that DAX will maintain?
 
 Specification
 -------------
 
-A ``specification`` is a binary (pass/fail) evaluation of a ``measurement`` of a ``metric``. There can be an arbitrary number of ``specifications`` associated with a ``metric``.
+A ``Specification`` is a binary (pass/fail) evaluation of a ``Measurement`` of a ``Metric``. There can be an arbitrary number of ``Specifications`` associated with a ``Metric``.
 
 Attributes
 ^^^^^^^^^^
 
-* ``metric_name`` — Identifier of the ``metric`` that this specification is attached to.
-* ``provenance_query`` — only ``measurements`` that have matching ``provenance`` parameters are tested by this ``specification``.
-* ``alert_listeners`` - Slack IDs of people who are alerted if a measurement fails the specification.
-* ``alert_channels`` - Slack Channel IDs that recieve messages when a measurement fails a specification.
-* ``threshold`` and comparison_operator — measurement passes specification if measurement is on the side of the threshold indicated by the comparison operator.
-* ``range`` — measurement passes specification if measurement is within this range (new).
+* ``Metric_name`` — Identifier of the ``Metric`` that this Specification is attached to.
+* ``Provenance_query`` — only ``Measurements`` that have matching ``Provenance`` parameters are tested by this ``Specification``.
+* ``Parameters`` - A dict of key:value pairs that must be matched by the ``Job``'s ``Provenance`` regarding particular values used in a calculation (e.g. diameter used for aperture photometry).
+* ``alert_listeners`` - Slack IDs of people who are alerted if a ``Measurement`` fails the ``Specification``.
+* ``alert_channels`` - Slack Channel IDs that recieve messages when a ``Measurement`` fails a ``Specification``.
+* ``threshold`` and comparison_operator — ``Measurement`` passes ``Specification`` if ``Measurement`` is on the side of the threshold indicated by the comparison operator.
+* ``range`` — ``Measurement`` passes ``Specification`` if Measurement is within this range (new).
 
 Questions & Notes
-^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
-* Either threshold or range can be set. Possibly there should be different classes of specification (i.e., a ThresholdSpecification or a RangeSpecification).
-* Note that we're jettisoning some of the earlier Specification class baggage, like parameters, and dependencies. This means that the definitions of metrics are no longer driven by definitions of specifications, as they currently are for AFx/ADx, for example. Instead, this flexibility is handled by additional metrics.
+* Either threshold or range can be set. Possibly there should be different classes of Specification (i.e., a ThresholdSpecification or a RangeSpecification).
+* Note that we're jettisoning some of the earlier ``Specification`` class baggage, like dependencies. This means that the definitions of Metrics are no longer driven by definitions of Specifications, as they currently are for AFx/ADx, for example. Instead, this flexibility is handled by additional Metrics.
+* Should the ``Parameters`` just be part of the ``Provenance``, or should they be a separate section for maintanence convinience and get ingested into the ``Provenance``?
 
 MeasurementView
 ---------------
 
-A MeasurementView is a collection of measurements for a metric, possibly filtered by provenance. A MeasurementView can be used to populate a measurement timeseries (regression plot), as seen in SQUASH. A MeasurementView is essentially a DB query, but provides a more concrete API for us to think about how we can do data science against measurements.
+A MeasurementView is a collection of Measurements for a Metric, possibly filtered by Provenance. A MeasurementView can be used to populate a Measurement timeseries (regression plot), as seen in SQUASH. A MeasurementView is essentially a DB query, but provides a more concrete API for us to think about how we can do data science against Measurements.
 
 Attributes
 ^^^^^^^^^^
 
-* ``metric_name``
-* ``provenance_query``
+* ``Metric_name``
+* ``Provenance_query``
 
-How packages define new metrics
+How packages define new Metrics
 ===============================
 
-* Every ``metric`` and ``specification`` is defined in yaml files in ``validation_metrics``, in per-package directories.
-* How is this metric added to the SQUASH DB?
-* Package developer implements measurement code and puts data into measurement/blob/job objects.
+* Every ``Metric`` and ``Specification`` is defined in yaml files in ``validation_Metrics``, in per-package directories.
+* How is this Metric added to the SQUASH DB?
+* Package developer implements Measurement code and puts data into Measurement/blob/Job objects.
 
-How measurements are submitted to SQUASH
+How Measurements are submitted to SQUASH
 ========================================
 
 Design Principles
@@ -179,22 +209,22 @@ Design Principles
 Proposal
 --------
 
-Packages construct a ``job`` that contains ``measurements``, ``blobs`` and ``provenance``. This ``job``, serialized to JSON, is sent over the logger. A special metric logger is used that saves this log statement to a separate file. A next-generation post-qa sends this job to SQUASH's REST API.
+Packages construct a ``Job`` that contains ``Measurements``, ``blobs`` and ``Provenance``. This ``Job``, serialized to JSON, is sent over the logger. A special Metric logger is used that saves this log statement to a separate file. A next-generation post-qa sends this Job to SQUASH's REST API.
 
-* Bonus: Packages could provide Jupyter Notebooks that locally consume the log data to show plots and pass/fail specification status.
+* Bonus: Packages could provide Jupyter Notebooks that locally consume the log data to show plots and pass/fail Specification status.
 * Bonus: make validate_base capable of generating the Jupyter Notebook!
 * Bonus: share Bokeh plots between notebooks and SQUASH.
 
-How specifications are registered
+How Specifications are registered
 =================================
 
 Design principles
 -----------------
 
-* ``Specifications`` are a mechanism for LSST staff to monitor a ``MeasurementView`` and be alerted whenever a new ``measurement`` exceeds a threshold or range.
-* It needs to be easy for any LSST staff member to register a new ``specification``; they should not be required to contact SQuaRE to register or change a ``specification``.
+* ``Specifications`` are a mechanism for LSST staff to monitor a ``MeasurementView`` and be alerted whenever a new ``Measurement`` exceeds a threshold or range.
+* It needs to be easy for any LSST staff member to register a new ``Specification``; they should not be required to contact SQuaRE to register or change a ``Specification``.
 * Specifications should be available offline, but be synced to SQUASH.
 
 Proposal
 --------
-There is a common EUPS package that contains ``Specifications`` in a YAML format. These specifications are available, through a Python API, to packages so that they can show real-time pass/fail status of measurements. The specifications are also synchronized with the SQUASH database. If someone wants to be alerted by a specification, they sign themselves up as an owner of the specification.
+There is a common EUPS package that contains ``Specifications`` in a YAML format. These Specifications are available, through a Python API, to packages so that they can show real-time pass/fail status of Measurements. The Specifications are also synchronized with the SQUASH database. If someone wants to be alerted by a Specification, they sign themselves up as an owner of the Specification.
