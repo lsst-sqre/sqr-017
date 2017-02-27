@@ -23,10 +23,34 @@ Frossie's design principles
 The validate_base 2.0 data model
 ================================
 
+The validation framework provides a rich set of objects for developers to use.
+The core objects are metrics, specifications, measurements, and monitors.
+Their relationships are summarized as:
+
+| *Metrics* are *measured*.
+| Measurements are tested by *specifications*.
+| Specification tests trigger *monitors.*
+|
+
+The full list of validation framework objects is:
+
+- MetricRepo
+- :ref:`MetricSet <metricset>`
+- :ref:`Metric <metric>`
+- :ref:`Measurement <measurement>`
+- :ref:`Blob <blob>`
+- :ref:`Job <job>`
+- :ref:`Provenance <provenance>`
+- :ref:`Specification <specification>`
+- Monitor
+- :ref:`MeasurementView <measurementview>`
+
 Afterburner
 -----------
 
 An ``afterburner`` is a piece of code that is executed on the output of a ``Task`` in order to calculate a ``Measurement`` of a ``Metric``.
+
+.. _metricset:
 
 MetricSet
 ---------
@@ -41,6 +65,8 @@ Attributes
 * directory within eups data package for dataset
 * butler dataId or list of dataIds (optional)
 * Metrics (list?)
+
+.. _metric:
 
 Metric
 ------
@@ -70,6 +96,8 @@ Questions & Notes
 * In the existing ``lsst.validate.base.Metric``, there is a parameters dictionary that defines constants for the Measurement code. For example, the annulus diameter from AMx Metrics. These parameters will be contained in the ``Specifications``.
 * We talked about making the minimum ``Provenance`` required for a ``Measurement``/``Job`` being defined in the ``Metric``. Is this still a requirement?
 
+.. _measurement:
+
 Measurement
 -----------
 
@@ -93,6 +121,8 @@ Questions & Notes
 * ``lsst.validate.base.MeasurementBase`` originally had a parameters attribute that provided Provenance for how the Measurement was made (e.g., a S/N cut-off for star selection). These will now be part of the Task configuration, and available through the regular Provenance.
 * ``lsst.validate.base.MeasurementBase`` also had an extras attribute where additional Measurement outputs could be persisted (JSON serializable). Do we still want this? Or do we always want such data to go into a Blob?
 
+.. _blob:
+
 Blob
 ----
 
@@ -102,6 +132,8 @@ Prior art
 ^^^^^^^^^
 
 * ``lsst.validate.base.BlobBase``
+
+.. _job:
 
 Job
 ---
@@ -126,6 +158,8 @@ Questions & Notes
 * What is the schema of ``Provenance``? At minimum, it includes the input dataIds (input dataset) and task configurations.
 * Not all ``Provenance`` is currently known within the pipeline. We use post-qa to hydrate Job Provenance with package versions and Jenkins environment variables. However, working towards a state where post-qa is no longer used as a shim, it's not unreasonable to move this into validate_base.
 
+.. _provenance:
+
 Provenance
 ----------
 
@@ -137,6 +171,8 @@ Questions & Notes
 * How is provenance defined?
 * How do we define queries on provenance in a ``Specification``?
 * How do we map between this provenance and the one that DAX will maintain?
+
+.. _specification:
 
 Specification
 -------------
@@ -160,6 +196,8 @@ Questions & Notes
 * Either threshold or range can be set. Possibly there should be different classes of Specification (i.e., a ThresholdSpecification or a RangeSpecification).
 * Note that we're jettisoning some of the earlier ``Specification`` class baggage, like dependencies. This means that the definitions of Metrics are no longer driven by definitions of Specifications, as they currently are for AFx/ADx, for example. Instead, this flexibility is handled by additional Metrics.
 * Should the ``Parameters`` just be part of the ``Provenance``, or should they be a separate section for maintanence convinience and get ingested into the ``Provenance``?
+
+.. _measurementview:
 
 MeasurementView
 ---------------
