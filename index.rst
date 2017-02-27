@@ -15,7 +15,8 @@
 Frossie's design principles
 ===========================
 
-* Metric something something of code. (FIXME)
+* Metric should be defined independently of code.
+  Client-side code should consume metric definitions., and so will server-side code.
 * Implement as a thin shim over what will become a Butler put.
 * UX for Metric developers: make it as easy as possible for a developer to define a new ``Metric`` and ``Measurements`` appear in SQUASH and be monitored.
 
