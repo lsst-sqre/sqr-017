@@ -37,6 +37,7 @@ The full list of validation framework objects is:
 - MetricRepo
 - :ref:`MetricSet <metricset>`
 - :ref:`Metric <metric>`
+- :ref:`MeasurementSet <measurementSet>`
 - :ref:`Measurement <measurement>`
 - :ref:`Blob <blob>`
 - :ref:`Job <job>`
@@ -44,6 +45,7 @@ The full list of validation framework objects is:
 - :ref:`Specification <specification>`
 - Monitor
 - :ref:`MeasurementView <measurementview>`
+
 
 Afterburner
 -----------
@@ -85,6 +87,7 @@ Attributes
 * ``name``
 * ``description``
 * ``unit``
+* ``tags``
 * ``reference.doc``
 * ``reference.page``
 * ``reference.url``
@@ -95,6 +98,21 @@ Questions & Notes
 * ``Specifications`` are no longer contained by ``Metrics``.
 * In the existing ``lsst.validate.base.Metric``, there is a parameters dictionary that defines constants for the Measurement code. For example, the annulus diameter from AMx Metrics. These parameters will be contained in the ``Specifications``.
 * We talked about making the minimum ``Provenance`` required for a ``Measurement``/``Job`` being defined in the ``Metric``. Is this still a requirement?
+
+.. _measurementSet:
+
+MeasurementSet
+--------------
+
+A ``MeasurementSet`` is a collection of measurements, and their associated metadata.
+
+Attributes
+^^^^^^^^^^
+_
+* ``name`` — Name of the ``MetricSet`` that these ``Measurements`` are associated with (e.g. ``validate_drp``)
+* ``job_id`` — Job identifier
+* ``provenance`` — provenance of the executed job (*TODO: should this actually live in the job itself?*)
+* ``measurements`` — dictionary of name: ``Measurement``.
 
 .. _measurement:
 
@@ -111,9 +129,8 @@ Prior art
 Attributes
 ^^^^^^^^^^
 
-* ``Job_id`` — Job identifier.
-* ``Metric_name`` — Metric identifier.
-* ``value`` — scalar Measurement value, required to be persisted in units of ``Metric.unit``.
+* ``name`` — Name of metric that this measured.
+* ``value`` — scalar Measurement value, required to be persisted in units of ``Metric.unit`` as an ``astropy.Quantity``.
 
 Questions & Notes
 ^^^^^^^^^^^^^^^^^
@@ -148,7 +165,7 @@ Prior art
 Attributes
 ^^^^^^^^^^
 
-* ``Measurements`` — list of Measurement objects.
+* ``Measurements`` — list of Measurement objects (``TODO: or a MeasurementSet?``).
 * ``blobs`` — list of Blob objects. Each blob should be reference by at least one * Measurement.
 * ``Provenance`` — data structure that fully specifies the Provenance of the pipeline run.
 
@@ -182,9 +199,9 @@ A ``Specification`` is a binary (pass/fail) evaluation of a ``Measurement`` of a
 Attributes
 ^^^^^^^^^^
 
-* ``Metric_name`` — Identifier of the ``Metric`` that this Specification is attached to.
-* ``Provenance_query`` — only ``Measurements`` that have matching ``Provenance`` parameters are tested by this ``Specification``.
-* ``Parameters`` - A dict of key:value pairs that must be matched by the ``Job``'s ``Provenance`` regarding particular values used in a calculation (e.g. diameter used for aperture photometry).
+* ``name`` — Identifier of the ``Metric`` that this Specification is attached to.
+* ``provenance_query`` — only ``Measurements`` that have matching ``Provenance`` parameters are tested by this ``Specification``.
+* ``parameters`` - A dict of key:value pairs that must be matched by the ``Job``'s ``Provenance`` regarding particular values used in a calculation (e.g. diameter used for aperture photometry).
 * ``alert_listeners`` - Slack IDs of people who are alerted if a ``Measurement`` fails the ``Specification``.
 * ``alert_channels`` - Slack Channel IDs that recieve messages when a ``Measurement`` fails a ``Specification``.
 * ``threshold`` and comparison_operator — ``Measurement`` passes ``Specification`` if ``Measurement`` is on the side of the threshold indicated by the comparison operator.
