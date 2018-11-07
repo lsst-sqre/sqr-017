@@ -297,7 +297,7 @@ A metric definition itself is minimal, consisting of only three fields:
   This description is consumed by the Science Pipelines documentation, and also shown by SQUASH.
 
 - ``unit``: the string representation of the :py:obj:`astropy.units.Unit` that measurements of a metric are made in.
-  Unitless metrics (a count, for example), have units written as ``---``.
+  Unitless metrics (a count, for example), have units written as an empty string ``''``.
   Percentages can be written as ``%``.
   Fractions are not supported by `astropy.unit` so fractional metrics must be rephrased as percentages.
 
